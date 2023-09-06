@@ -49,8 +49,3 @@ module.exports.dislikeCard = (req, res) => {
       : res.status(404).send({message: 'Карточка не найдена'}))
     .catch(() => res.status(400).send({message: 'Некорректный Id'}));
 }
-
-// .catch((err) => {err.name ==='ValidationError'
-//   ? res.status(400).send({message: err.message})
-//   : res.status(500).send({ message: 'На сервере произошла ошибка' })
-// });

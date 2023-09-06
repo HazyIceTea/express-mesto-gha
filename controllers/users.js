@@ -20,8 +20,10 @@ module.exports.getUsers = (req, res) => {
 
 module.exports.getSingleUser = (req, res) => {
   User.findById(req.params.userId)
-    .then(user => res.send(user))
-    .catch(() => (res.status(404).send({message: 'Пользователь не найден'})))
+    .then(user => user
+      ? res.send(user)
+      : res.status(404).send({message: 'Пользователь не найден'}))
+    .catch(() => (res.status(400).send({message: 'Некорректный Id'})))
 }
 
 module.exports.updateUserInfo = (req, res) => {
