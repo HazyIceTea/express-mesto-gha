@@ -1,29 +1,30 @@
 const User = require('../models/user');
+const http2 = require("http2");
 
 module.exports.createUser = (req, res) => {
   const {name, about, avatar} = req.body;
 
   User.create({name, about, avatar})
-    .then(user => res.status(201).send(user))
+    .then(user => res.status(http2.constants.HTTP_STATUS_CREATED).send(user))
     .catch((err) => {
       err.name === 'ValidationError'
-        ? res.status(400).send({message: err.message})
-        : res.status(500).send({message: 'На сервере произошла ошибка'})
+        ? res.status(http2.constants.HTTP_STATUS_BAD_REQUEST).send({message: err.message})
+        : res.status(http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({message: 'На сервере произошла ошибка'})
     });
 };
 
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then(users => res.send({data: users}))
-    .catch(() => res.status(500).send({message: 'На сервере произошла ошибка'}));
+    .catch(() => res.status(http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({message: 'На сервере произошла ошибка'}));
 };
 
 module.exports.getSingleUser = (req, res) => {
   User.findById(req.params.userId)
     .then(user => user
       ? res.send(user)
-      : res.status(404).send({message: 'Пользователь не найден'}))
-    .catch(() => (res.status(400).send({message: 'Некорректный Id'})))
+      : res.status(http2.constants.HTTP_STATUS_NOT_FOUND).send({message: 'Пользователь не найден'}))
+    .catch(() => (res.status(http2.constants.HTTP_STATUS_BAD_REQUEST).send({message: 'Некорректный Id'})))
 }
 
 module.exports.updateUserInfo = (req, res) => {
@@ -32,13 +33,15 @@ module.exports.updateUserInfo = (req, res) => {
       runValidators: true,
       new: true
     })
-      .then(user => res.status(200).send(user))
+      .then(user => user
+        ? res.send(user)
+        : res.status(http2.constants.HTTP_STATUS_NOT_FOUND).send({message: 'Пользователь не найден'}))
       .catch((err) => {
         err.name === 'ValidationError'
-          ? res.status(400).send({message: err.message})
-          : res.status(404).send({message: 'Пользователь не найден'})
+          ? res.status(http2.constants.HTTP_STATUS_BAD_REQUEST).send({message: err.message})
+          : res.status(http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({message: 'На сервере произошла ошибка'})
       })
-    : res.status(500).send({message: 'На сервере произошла ошибка'})
+    : res.status(http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({message: 'На сервере произошла ошибка'})
 }
 
 module.exports.updateAvatar = (req, res) => {
@@ -47,16 +50,13 @@ module.exports.updateAvatar = (req, res) => {
       runValidators: true,
       new: true
     })
-      .then(user => res.status(200).send(user))
+      .then(user => user
+        ? res.send(user)
+        : res.status(http2.constants.HTTP_STATUS_NOT_FOUND).send({message: 'Пользователь не найден'}))
       .catch((err) => {
         err.name === 'ValidationError'
-          ? res.status(400).send({message: err.message})
-          : res.status(404).send({message: 'Пользователь не найден'})
+          ? res.status(http2.constants.HTTP_STATUS_BAD_REQUEST).send({message: err.message})
+          : res.status(http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({message: 'На сервере произошла ошибка'})
       })
-    : res.status(500).send({message: 'На сервере произошла ошибка'})
+    : res.status(http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({message: 'На сервере произошла ошибка'})
 }
-
-// .catch((err) => {err.name ==='ValidationError'
-//   ? res.status(400).send({message: err.message})
-//   : res.status(500).send({ message: 'На сервере произошла ошибка' })
-// });
