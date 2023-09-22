@@ -1,36 +1,38 @@
 const Card = require('../models/card');
 const http2 = require("http2");
+const ErrorBadRequest = require("../errors/ErrorBadRequest");
+const ErrorNotFound = require("../errors/ErrorNotFound");
 
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .then(cards => res.send({cards}))
-    .catch(() => res.status(http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({message: 'На сервере произошла ошибка'}));
+    .catch((err) => next(err));
 }
 
-module.exports.postCard = (req, res) => {
+module.exports.postCard = (req, res, next) => {
   const {name, link} = req.body;
   Card.create({name, link, owner: req.user._id})
     .then(card => res.status(http2.constants.HTTP_STATUS_CREATED).send(card))
     .catch((err) => {
       err.name === 'ValidationError'
-        ? res.status(http2.constants.HTTP_STATUS_BAD_REQUEST).send({message: err.message})
-        : res.status(http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({message: 'На сервере произошла ошибка'})
+        ? next(new ErrorBadRequest(err))
+        : next(err)
     });
 }
 
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then(card => card
       ? res.send({message: 'Карточка успешно удалена'})
-      : res.status(http2.constants.HTTP_STATUS_NOT_FOUND).send({message: 'Карточка не найдена'}))
+      : next(new ErrorNotFound('Карточка не найдена')))
     .catch((err) =>
       err.name === 'CastError'
-        ? res.status(http2.constants.HTTP_STATUS_BAD_REQUEST).send({message: 'Некорректный Id'})
-        : res.status(http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({message: 'На сервере произошла ошибка'})
+        ? next(new ErrorBadRequest('Некорректный Id'))
+        : next(err)
     ) ;
 }
 
-module.exports.likeCard = (req, res) => {
+module.exports.likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     {$addToSet: {likes: req.user._id}},
@@ -38,16 +40,16 @@ module.exports.likeCard = (req, res) => {
   )
     .then(card => card
       ? res.send({message: 'Лайк успешно поставлен'})
-      : res.status(http2.constants.HTTP_STATUS_NOT_FOUND).send({message: 'Карточка не найдена'}))
+      : next(new ErrorNotFound('Карточка не найдена')))
     .catch((err) =>
       err.name === 'CastError'
-        ? res.status(http2.constants.HTTP_STATUS_BAD_REQUEST).send({message: 'Некорректный Id'})
-        : res.status(http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({message: 'На сервере произошла ошибка'})
+        ? next(new ErrorBadRequest('Некорректный Id'))
+        : next(err)
     ) ;
 
 }
 
-module.exports.dislikeCard = (req, res) => {
+module.exports.dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     {$pull: {likes: req.user._id}},
@@ -55,10 +57,10 @@ module.exports.dislikeCard = (req, res) => {
   )
     .then(card => card
       ? res.send({message: 'Лайк успешно удалён'})
-      : res.status(http2.constants.HTTP_STATUS_NOT_FOUND).send({message: 'Карточка не найдена'}))
+      : next(new ErrorNotFound('Карточка не найдена')))
     .catch((err) =>
       err.name === 'CastError'
-        ? res.status(http2.constants.HTTP_STATUS_BAD_REQUEST).send({message: 'Некорректный Id'})
-        : res.status(http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({message: 'На сервере произошла ошибка'})
+        ? next(new ErrorBadRequest('Некорректный Id'))
+        : next(err)
     ) ;
 }

@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require("express");
 const http2 = require('http2');
+const ErrorNotFound = require("./errors/ErrorNotFound");
 
 
 const { PORT = 3000 } = process.env;
@@ -22,7 +23,19 @@ app.use((req, res, next) => {
 
 app.use('/cards', require('./routes/cards'));
 app.use('/users', require('./routes/users'));
-app.use('*', (req, res) => res.status(http2.constants.HTTP_STATUS_NOT_FOUND).send({message: 'Страница не найдена'}));
+app.use('*', (req, res, next) => next(new ErrorNotFound('Страница не найдена')));
+
+app.use((err, req, res, next) => {
+  const { statusCode = http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR, message } = err;
+
+  res
+    .status(statusCode)
+    .send({
+      message: statusCode === http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR
+        ? 'На сервере произошла ошибка'
+        : message
+    });
+});
 
 
 app.listen(PORT);
