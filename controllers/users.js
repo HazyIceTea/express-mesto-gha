@@ -2,21 +2,30 @@ const User = require('../models/user');
 const http2 = require("http2");
 const ErrorBadRequest = require("../errors/ErrorBadRequest");
 const ErrorNotFound = require("../errors/ErrorNotFound");
+const bcrypt = require('bcryptjs')
+const ErrorConflict = require("../errors/ErrorConflict");
+const jwt = require('jsonwebtoken')
 
 module.exports.createUser = (req, res, next) => {
   const {name, about, avatar, email, password} = req.body;
 
-  // if(!email || !password) {
-  //   return res.status(http2.constants.HTTP_STATUS_BAD_REQUEST).send({message: 'Email и пароль не могут быть пустыми'})
-  // }
+  bcrypt.hash(password, 10)
+    .then(hash => {
+      User.create({name, about, avatar, email, password: hash})
+        .then(user => res.status(http2.constants.HTTP_STATUS_CREATED).send(user))
+        .catch((err) => {
+          if(err.code === 11000) {
+            next(new ErrorConflict('Пользователь с таким Email уже существует'))
+          }
+          else if(err.name === 'ValidationError') {
+            next(new ErrorBadRequest(err))
+          }
+          else
+            next(err)
+        });
+    })
 
-  User.create({name, about, avatar, email, password})
-    .then(user => res.status(http2.constants.HTTP_STATUS_CREATED).send(user))
-    .catch((err) => {
-      err.name === 'ValidationError'
-        ? next(new ErrorBadRequest(err))
-        : next(err)
-    });
+
 };
 
 module.exports.getUsers = (req, res, next) => {
@@ -34,7 +43,13 @@ module.exports.getSingleUser = (req, res, next) => {
       err.name === 'CastError'
         ? next(new ErrorBadRequest('Некорректный Id'))
         : next(err)
-    ) ;
+    );
+}
+
+module.exports.getUserInfo = (req, res, next) => {
+  User.findById(req.user._id)
+    .then(user => res.send(user))
+    .catch(err => next(err))
 }
 
 module.exports.updateUserInfo = (req, res, next) => {
@@ -70,3 +85,16 @@ module.exports.updateAvatar = (req, res, next) => {
       })
     : res.status(http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({message: 'На сервере произошла ошибка'})
 }
+
+module.exports.login = (req, res, next) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then(user => {
+      const token = jwt.sign({ _id: user._id }, 'some-secret-key', {expiresIn: '7d'});
+
+      res.send({ token });
+    })
+    .catch(err => next(err))
+};
+

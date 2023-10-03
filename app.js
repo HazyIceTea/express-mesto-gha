@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const bodyParser = require("express");
 const http2 = require('http2');
 const ErrorNotFound = require("./errors/ErrorNotFound");
+const {createUser, login} = require("./controllers/users");
+const auth = require('./middlewares/auth')
 
 
 const { PORT = 3000 } = process.env;
@@ -13,17 +15,16 @@ const app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use((req, res, next) => {
-  req.user = {
-    _id: '64d10fc14259194230ba84d5'
-  };
 
-  next();
-});
+app.post('/signup', createUser);
+app.post('/signin', login);
+
+app.use(auth)
 
 app.use('/cards', require('./routes/cards'));
 app.use('/users', require('./routes/users'));
 app.use('*', (req, res, next) => next(new ErrorNotFound('Страница не найдена')));
+
 
 app.use((err, req, res, next) => {
   const { statusCode = http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR, message } = err;

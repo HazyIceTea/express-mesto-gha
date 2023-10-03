@@ -2,6 +2,7 @@ const Card = require('../models/card');
 const http2 = require("http2");
 const ErrorBadRequest = require("../errors/ErrorBadRequest");
 const ErrorNotFound = require("../errors/ErrorNotFound");
+const ErrorForbidden = require("../errors/ErrorForbidden");
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
@@ -21,15 +22,24 @@ module.exports.postCard = (req, res, next) => {
 }
 
 module.exports.deleteCard = (req, res, next) => {
-  Card.findByIdAndRemove(req.params.cardId)
-    .then(card => card
-      ? res.send({message: 'Карточка успешно удалена'})
-      : next(new ErrorNotFound('Карточка не найдена')))
-    .catch((err) =>
-      err.name === 'CastError'
-        ? next(new ErrorBadRequest('Некорректный Id'))
-        : next(err)
-    ) ;
+  Card.findById(req.params.cardId)
+    .then(card => {
+      if (!card.owner.equals(req.user._id)) {
+        res.status(http2.constants.HTTP_STATUS_FORBIDDEN).send({message: 'Нельзя удалть карточку другого пользователя'})
+      }
+      else {
+        Card.deleteOne(card)
+          .then(card => card
+            ? res.send({message: 'Карточка успешно удалена'})
+            : next(new ErrorNotFound('Карточка не найдена')))
+          .catch((err) =>
+            err.name === 'CastError'
+              ? next(new ErrorBadRequest('Некорректный Id'))
+              : next(err)
+          );
+      }
+    })
+    .catch(() => next(new ErrorNotFound('Карточка не найдена')))
 }
 
 module.exports.likeCard = (req, res, next) => {
@@ -45,7 +55,7 @@ module.exports.likeCard = (req, res, next) => {
       err.name === 'CastError'
         ? next(new ErrorBadRequest('Некорректный Id'))
         : next(err)
-    ) ;
+    );
 
 }
 
@@ -62,5 +72,5 @@ module.exports.dislikeCard = (req, res, next) => {
       err.name === 'CastError'
         ? next(new ErrorBadRequest('Некорректный Id'))
         : next(err)
-    ) ;
+    );
 }
