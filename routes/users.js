@@ -20,7 +20,7 @@ router.patch('/me/avatar', celebrate({
 
 router.get('/:userId', celebrate({
   body: Joi.object().keys({
-    userId: Joi.string().length(24).hex().id()
+    userId: Joi.string().length(24).hex()
   }),
 }), getSingleUser);
 
