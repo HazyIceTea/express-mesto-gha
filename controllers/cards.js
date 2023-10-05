@@ -37,7 +37,7 @@ module.exports.deleteCard = (req, res, next) => {
       }
     })
     .catch((err) => {
-      err.code === '404'
+      err.code === 404
         ? next(new ErrorNotFound('Карточка не найдена'))
         : next(err)
     });
