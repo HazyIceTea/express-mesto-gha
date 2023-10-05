@@ -23,6 +23,7 @@ module.exports.postCard = (req, res, next) => {
 
 module.exports.deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
+    .orFail()
     .then((card) => {
       if (!card.owner.equals(req.user._id)) {
         next(new ErrorForbidden('Нельзя удалть карточку другого пользователя'));
@@ -36,11 +37,7 @@ module.exports.deleteCard = (req, res, next) => {
             : next(err)));
       }
     })
-    .catch((err) => {
-      err.code === 404
-        ? next(new ErrorNotFound('Карточка не найдена'))
-        : next(err)
-    });
+    .catch(err => next(err));
 };
 
 module.exports.likeCard = (req, res, next) => {
