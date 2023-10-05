@@ -5,8 +5,8 @@ const router = require('express').Router();
 router.get('/', getCards);
 
 router.delete('/:cardId', celebrate({
-  body: Joi.object().keys({
-    cardId: Joi.string().length(24).hex()
+  params: Joi.object().keys({
+    cardId: Joi.string().length(24).hex().required()
   }),
 }), deleteCard);
 
