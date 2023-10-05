@@ -11,25 +11,25 @@ const cardSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Заполните поле'],
     validate: {
-      validator(link){
-        return /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$/.test(link)
-      }
-    }
+      validator(link) {
+        return /^https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b(?:[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)$/.test(link);
+      },
+    },
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
     required: [true, 'Заполните поле'],
-    ref: 'user'
+    ref: 'user',
   },
   likes: [{
     type: mongoose.Schema.Types.ObjectId,
     default: [],
-    ref: 'user'
+    ref: 'user',
   }],
   createdAt: {
     type: Date,
     default: Date.now,
-  }
+  },
 
 });
 
