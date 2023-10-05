@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const ErrorUnauthorized = require('../errors/ErrorUnauthorized');
 
@@ -31,9 +30,8 @@ const userSchema = new mongoose.Schema({
     unique: true,
     validate: {
       validator(email) {
-        // validator.isEmail(email)
         return /^\S+@\S+\.\S+$/.test(email);
-      }, // библиотека validator напрочь откзывается работать
+      },
       message: 'Некорректный формат Email',
     },
 
@@ -46,7 +44,7 @@ const userSchema = new mongoose.Schema({
 
 });
 
-userSchema.statics.findUserByCredentials = function (email, password) {
+userSchema.statics.findUserByCredentials = function findUserByCredentials(email, password) {
   return this.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {

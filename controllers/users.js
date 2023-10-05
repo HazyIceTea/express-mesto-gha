@@ -69,7 +69,6 @@ module.exports.updateUserInfo = (req, res, next) => {
           : next(err);
       })
     : next();
-  // : res.status(http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({message: 'На сервере произошла ошибка'})
 };
 
 module.exports.updateAvatar = (req, res, next) => {
@@ -87,7 +86,6 @@ module.exports.updateAvatar = (req, res, next) => {
           : next(err);
       })
     : next();
-  // : res.status(http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR).send({message: 'На сервере произошла ошибка'})
 };
 
 module.exports.login = (req, res, next) => {

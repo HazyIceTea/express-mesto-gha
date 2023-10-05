@@ -42,7 +42,7 @@ app.use('*', (req, res, next) => next(new ErrorNotFound('Страница не �
 
 app.use(errors());
 
-app.use((err, req, res,next) => {
+app.use((err, req, res, next) => {
   const { statusCode = http2.constants.HTTP_STATUS_INTERNAL_SERVER_ERROR, message } = err;
 
   res

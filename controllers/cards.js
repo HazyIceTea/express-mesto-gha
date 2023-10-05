@@ -36,7 +36,11 @@ module.exports.deleteCard = (req, res, next) => {
             : next(err)));
       }
     })
-    .catch(() => next(new ErrorNotFound('Карточка не найдена')));
+    .catch((err) => {
+      err.code === '404'
+        ? next(new ErrorNotFound('Карточка не найдена'))
+        : next(err)
+    });
 };
 
 module.exports.likeCard = (req, res, next) => {
