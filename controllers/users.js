@@ -63,9 +63,8 @@ module.exports.updateUserInfo = (req, res, next) => {
       ? res.send(user)
       : next(new ErrorNotFound('Пользователь не найден'))))
     .catch((err) => {
-      err.name === 'ValidationError'
-        ? next(new ErrorBadRequest(err))
-        : next(err);
+      if (err.name === 'ValidationError') next(new ErrorBadRequest(err));
+      else next(err);
     });
 };
 
@@ -78,9 +77,8 @@ module.exports.updateAvatar = (req, res, next) => {
       ? res.send(user)
       : next(new ErrorNotFound('Пользователь не найден'))))
     .catch((err) => {
-      err.name === 'ValidationError'
-        ? next(new ErrorBadRequest(err))
-        : next(err);
+      if (err.name === 'ValidationError') next(new ErrorBadRequest(err));
+      else next(err);
     });
 };
 

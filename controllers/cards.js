@@ -15,9 +15,8 @@ module.exports.postCard = (req, res, next) => {
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.status(http2.constants.HTTP_STATUS_CREATED).send(card))
     .catch((err) => {
-      err.name === 'ValidationError'
-        ? next(new ErrorBadRequest(err))
-        : next(err);
+      if (err.name === 'ValidationError') next(new ErrorBadRequest(err));
+      else next(err);
     });
 };
 
@@ -29,7 +28,7 @@ module.exports.deleteCard = (req, res, next) => {
         next(new ErrorForbidden('Нельзя удалть карточку другого пользователя'));
       } else {
         Card.deleteOne(card)
-          .then((card) => (card
+          .then(() => (card
             ? res.send({ message: 'Карточка успешно удалена' })
             : next(new ErrorNotFound('Карточка не найдена'))))
           .catch((err) => (err.name === 'CastError'
