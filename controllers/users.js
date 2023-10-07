@@ -55,37 +55,33 @@ module.exports.getUserInfo = (req, res, next) => {
 };
 
 module.exports.updateUserInfo = (req, res, next) => {
-  req.user._id
-    ? User.findByIdAndUpdate(req.user._id, { name: req.body.name, about: req.body.about }, {
-      runValidators: true,
-      new: true,
-    })
-      .then((user) => (user
-        ? res.send(user)
-        : next(new ErrorNotFound('Пользователь не найден'))))
-      .catch((err) => {
-        err.name === 'ValidationError'
-          ? next(new ErrorBadRequest(err))
-          : next(err);
-      })
-    : next();
+  User.findByIdAndUpdate(req.user._id, { name: req.body.name, about: req.body.about }, {
+    runValidators: true,
+    new: true,
+  })
+    .then((user) => (user
+      ? res.send(user)
+      : next(new ErrorNotFound('Пользователь не найден'))))
+    .catch((err) => {
+      err.name === 'ValidationError'
+        ? next(new ErrorBadRequest(err))
+        : next(err);
+    });
 };
 
 module.exports.updateAvatar = (req, res, next) => {
-  req.user._id
-    ? User.findByIdAndUpdate(req.user._id, { avatar: req.body.avatar }, {
-      runValidators: true,
-      new: true,
-    })
-      .then((user) => (user
-        ? res.send(user)
-        : next(new ErrorNotFound('Пользователь не найден'))))
-      .catch((err) => {
-        err.name === 'ValidationError'
-          ? next(new ErrorBadRequest(err))
-          : next(err);
-      })
-    : next();
+  User.findByIdAndUpdate(req.user._id, { avatar: req.body.avatar }, {
+    runValidators: true,
+    new: true,
+  })
+    .then((user) => (user
+      ? res.send(user)
+      : next(new ErrorNotFound('Пользователь не найден'))))
+    .catch((err) => {
+      err.name === 'ValidationError'
+        ? next(new ErrorBadRequest(err))
+        : next(err);
+    });
 };
 
 module.exports.login = (req, res, next) => {
